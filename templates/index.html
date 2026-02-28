@@ -269,6 +269,69 @@
             background: #c82333;
         }
 
+        .camera-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .camera-modal.active {
+            display: flex;
+        }
+
+        .camera-content {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+
+        .camera-preview {
+            max-width: 100%;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .camera-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        #previewButton {
+            background: #17a2b8;
+            color: white;
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+
+        #previewButton:hover {
+            background: #138496;
+        }
+
         @media (max-width: 768px) {
             .container {
                 height: 100vh;
@@ -312,6 +375,7 @@
                 </div>
             </div>
             <div class="controls">
+                <button id="previewButton">📷 Preview Camera</button>
                 <button id="resetButton">Reset Chat</button>
             </div>
         </div>
@@ -341,6 +405,19 @@
         </div>
     </div>
 
+    <!-- Camera Preview Modal -->
+    <div class="camera-modal" id="cameraModal">
+        <div class="camera-content">
+            <button class="close-modal" id="closeModal">×</button>
+            <h3 style="text-align: center; margin-bottom: 15px;">📷 Camera Emotion Detection</h3>
+            <img id="cameraPreview" class="camera-preview" alt="Camera preview">
+            <p id="emotionText" style="text-align: center; font-size: 18px; font-weight: bold; color: #667eea;"></p>
+            <div class="camera-controls">
+                <button id="refreshPreview" style="background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 20px; cursor: pointer;">🔄 Refresh</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const chatContainer = document.getElementById('chatContainer');
         const messageInput = document.getElementById('messageInput');
@@ -348,6 +425,12 @@
         const cameraButton = document.getElementById('cameraButton');
         const loadingIndicator = document.getElementById('loadingIndicator');
         const resetButton = document.getElementById('resetButton');
+        const previewButton = document.getElementById('previewButton');
+        const cameraModal = document.getElementById('cameraModal');
+        const closeModal = document.getElementById('closeModal');
+        const cameraPreview = document.getElementById('cameraPreview');
+        const emotionText = document.getElementById('emotionText');
+        const refreshPreview = document.getElementById('refreshPreview');
 
         let cameraEnabled = false;
 
@@ -461,14 +544,72 @@
             }
         }
 
+        async function showCameraPreview() {
+            if (!cameraEnabled) {
+                alert('Camera is not available');
+                return;
+            }
+            
+            cameraModal.classList.add('active');
+            await refreshCameraPreview();
+        }
+
+        async function refreshCameraPreview() {
+            try {
+                emotionText.textContent = 'Detecting emotion...';
+                const response = await fetch('/api/camera/snapshot');
+                const data = await response.json();
+                
+                if (data.error) {
+                    emotionText.textContent = `Error: ${data.error}`;
+                    return;
+                }
+                
+                cameraPreview.src = data.image;
+                
+                if (data.emotion) {
+                    const emotionEmojis = {
+                        'happy': '😊',
+                        'sad': '😢',
+                        'angry': '😠',
+                        'fear': '😨',
+                        'surprise': '😲',
+                        'neutral': '😐',
+                        'disgust': '🤢'
+                    };
+                    const emoji = emotionEmojis[data.emotion] || '🤔';
+                    emotionText.textContent = `Detected: ${data.emotion} ${emoji}`;
+                } else {
+                    emotionText.textContent = 'No face detected - try better lighting or move closer';
+                }
+            } catch (error) {
+                console.error('Camera preview failed:', error);
+                emotionText.textContent = 'Failed to capture image';
+            }
+        }
+
+        function closeCameraPreview() {
+            cameraModal.classList.remove('active');
+        }
+
         sendButton.addEventListener('click', () => sendMessage(false));
         cameraButton.addEventListener('click', () => sendMessage(true));
         resetButton.addEventListener('click', resetConversation);
+        previewButton.addEventListener('click', showCameraPreview);
+        closeModal.addEventListener('click', closeCameraPreview);
+        refreshPreview.addEventListener('click', refreshCameraPreview);
         
         messageInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 sendMessage(false);
+            }
+        });
+
+        // Close modal on background click
+        cameraModal.addEventListener('click', (e) => {
+            if (e.target === cameraModal) {
+                closeCameraPreview();
             }
         });
 

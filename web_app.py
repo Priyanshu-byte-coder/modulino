@@ -107,22 +107,50 @@ def chat():
 
 @app.route('/api/camera/snapshot', methods=['GET'])
 def camera_snapshot():
-    """Capture a single frame from the camera."""
+    """Capture a single frame from the camera with emotion detection overlay."""
     global camera
     
     if not CAMERA_ENABLED or camera is None or not camera.is_available():
         return jsonify({"error": "Camera not available"}), 400
     
     try:
-        frame = camera.camera.read()
-        if frame is None:
+        # Capture frame
+        ret, frame = camera._cap.read()
+        if not ret or frame is None:
             return jsonify({"error": "Failed to capture frame"}), 500
         
+        # Detect emotion
+        emotion = None
+        try:
+            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            result = camera._detector.detect_emotions(rgb_frame)
+            
+            if result and len(result) > 0:
+                emotions = result[0]["emotions"]
+                emotion = max(emotions, key=emotions.get)
+                confidence = emotions[emotion]
+                
+                # Draw bounding box and emotion label on frame
+                box = result[0]["box"]
+                x, y, w, h = box
+                cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+                
+                # Add emotion text with background
+                text = f"{emotion}: {confidence:.2f}"
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                text_size = cv2.getTextSize(text, font, 0.6, 2)[0]
+                cv2.rectangle(frame, (x, y-30), (x+text_size[0]+10, y), (0, 255, 0), -1)
+                cv2.putText(frame, text, (x+5, y-10), font, 0.6, (0, 0, 0), 2)
+        except Exception as e:
+            logger.warning(f"Emotion detection failed: {e}")
+        
+        # Encode frame to JPEG
         _, buffer = cv2.imencode('.jpg', frame)
         jpg_as_text = base64.b64encode(buffer).decode('utf-8')
         
         return jsonify({
-            "image": f"data:image/jpeg;base64,{jpg_as_text}"
+            "image": f"data:image/jpeg;base64,{jpg_as_text}",
+            "emotion": emotion
         })
     except Exception as e:
         logger.error(f"Error capturing snapshot: {e}", exc_info=True)
