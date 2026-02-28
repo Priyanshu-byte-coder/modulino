@@ -8,7 +8,14 @@ from typing import Optional
 
 import requests
 
-from config.config import OLLAMA_BASE_URL, LLM_MODEL, LLM_TEMPERATURE, LLM_MAX_TOKENS
+from config.config import (
+    OLLAMA_BASE_URL,
+    LLM_MODEL,
+    LLM_TEMPERATURE,
+    LLM_MAX_TOKENS,
+    LLM_NUM_CTX,
+    LLM_NUM_THREAD,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +62,8 @@ class LLMClient:
             "options": {
                 "temperature": self.temperature,
                 "num_predict": self.max_tokens,
+                "num_ctx": LLM_NUM_CTX,
+                "num_thread": LLM_NUM_THREAD,
             },
         }
         try:
@@ -84,6 +93,8 @@ class LLMClient:
             "options": {
                 "temperature": self.temperature,
                 "num_predict": self.max_tokens,
+                "num_ctx": LLM_NUM_CTX,
+                "num_thread": LLM_NUM_THREAD,
             },
         }
         try:

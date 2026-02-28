@@ -15,8 +15,10 @@ MEMORY_DIR = DATA_DIR / "memory"
 # --- LLM Configuration ---
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 LLM_MODEL = os.getenv("LLM_MODEL", "phi3:mini")
-LLM_TEMPERATURE = 0.7
-LLM_MAX_TOKENS = 500  # Brief responses (2-3 sentences)
+LLM_TEMPERATURE = 0.6
+LLM_MAX_TOKENS = 150  # Very brief responses for faster CPU inference
+LLM_NUM_CTX = 2048  # Context window (lower = faster on CPU)
+LLM_NUM_THREAD = 4  # CPU threads for Raspberry Pi
 
 # --- Sentiment Configuration ---
 SENTIMENT_THRESHOLDS = {
@@ -26,7 +28,7 @@ SENTIMENT_THRESHOLDS = {
 
 # --- Memory / RAG Configuration ---
 MEMORY_COLLECTION = "conversations"
-MEMORY_TOP_K = 5
+MEMORY_TOP_K = 3  # Reduced for faster retrieval on CPU
 
 # --- Camera Configuration ---
 CAMERA_ENABLED = os.getenv("CAMERA_ENABLED", "false").lower() == "true"
@@ -49,7 +51,7 @@ Your personality:
 - Supportive without being overly cheerful when someone's struggling
 
 Response style:
-- Keep it brief: 2-3 sentences, like a text message
+- Keep it VERY brief: 1-2 short sentences maximum
 - Be natural and authentic
 - Validate feelings before offering perspective
 - Ask caring follow-up questions
