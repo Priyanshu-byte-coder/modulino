@@ -35,7 +35,7 @@ MEMORY_TOP_K = 3  # Reduced for faster retrieval on CPU
 # --- Camera Configuration ---
 # CAMERA_ENABLED = os.getenv("CAMERA_ENABLED", "false").lower() == "true"
 CAMERA_ENABLED = True
-CAMERA_INDEX = 1  # USB webcam on Raspberry Pi (video0 is usually built-in)
+CAMERA_INDEX = 0  # USB webcam capture device (video1 is metadata only)
 CAMERA_SAMPLE_INTERVAL = 3  # Capture emotion every N turns (to reduce latency)
 
 # --- Display Configuration ---
