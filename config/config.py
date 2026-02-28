@@ -16,7 +16,7 @@ MEMORY_DIR = DATA_DIR / "memory"
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 LLM_MODEL = os.getenv("LLM_MODEL", "tinyllama")
 LLM_TEMPERATURE = 0.5
-LLM_MAX_TOKENS = 80  # Very brief responses for fast CPU inference
+LLM_MAX_TOKENS = 50  # Very brief responses for fast CPU inference
 LLM_NUM_CTX = 1024  # Small context window (faster on CPU)
 LLM_NUM_THREAD = 4  # CPU threads for Raspberry Pi
 LLM_TIMEOUT = 300  # 5 min timeout for slow CPU inference
@@ -41,7 +41,7 @@ DISPLAY_MODE = os.getenv("DISPLAY_MODE", "terminal")  # "terminal" or "eink"
 TERMINAL_WIDTH = 80
 
 # --- System Prompt (kept short for CPU performance) ---
-SYSTEM_PROMPT = """You are Maya, a warm supportive friend. Reply in 1-2 short sentences only. Be caring and casual. If someone is in crisis, suggest professional help."""
+SYSTEM_PROMPT = """You are Maya. Reply in ONE short sentence (max 10 words). Be warm and caring."""
 
 # --- Ensure data directories exist ---
 MEMORY_DIR.mkdir(parents=True, exist_ok=True)
