@@ -17,6 +17,7 @@ from config.config import (
     LLM_NUM_CTX,
     LLM_NUM_THREAD,
     LLM_TIMEOUT,
+    LLM_STOP_SEQUENCES,
 )
 
 logger = logging.getLogger(__name__)
@@ -66,6 +67,7 @@ class LLMClient:
                 "num_predict": self.max_tokens,
                 "num_ctx": LLM_NUM_CTX,
                 "num_thread": LLM_NUM_THREAD,
+                "stop": LLM_STOP_SEQUENCES,
             },
         }
         try:
@@ -106,6 +108,7 @@ class LLMClient:
                 "num_predict": self.max_tokens,
                 "num_ctx": LLM_NUM_CTX,
                 "num_thread": LLM_NUM_THREAD,
+                "stop": LLM_STOP_SEQUENCES,
             },
         }
         try:
