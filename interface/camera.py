@@ -41,7 +41,6 @@ class WebcamCamera(BaseCamera):
         """Lazy initialization of camera and FER detector."""
         try:
             import cv2
-            from fer import FER
 
             logger.info(f"Attempting to open camera at index {CAMERA_INDEX}")
             self._cap = cv2.VideoCapture(CAMERA_INDEX)
@@ -50,17 +49,32 @@ class WebcamCamera(BaseCamera):
                 self._cap = None
                 return
 
-            self._detector = FER(mtcnn=False)
+            # Camera initialized successfully
             self._initialized = True
-            logger.info(f"Webcam emotion detection initialized (FER) on /dev/video{CAMERA_INDEX}.")
+            logger.info(f"Webcam initialized on /dev/video{CAMERA_INDEX}.")
+            
+            # Try to initialize FER (optional)
+            try:
+                from fer import FER
+                self._detector = FER(mtcnn=False)
+                logger.info("FER emotion detection enabled.")
+            except ImportError as e:
+                logger.warning("FER not available (missing dependency): %s. Camera will work without emotion detection.", e)
+                self._detector = None
+            except Exception as e:
+                logger.warning("FER initialization failed: %s. Camera will work without emotion detection.", e)
+                self._detector = None
+                
         except ImportError as e:
-            logger.warning("FER or OpenCV not available: %s", e)
+            logger.error("OpenCV not available: %s", e)
             self._cap = None
             self._detector = None
+            self._initialized = False
         except Exception as e:
             logger.error("Camera initialization failed: %s", e)
             self._cap = None
             self._detector = None
+            self._initialized = False
 
     def capture_emotion(self) -> Optional[str]:
         """Capture frame and detect dominant emotion. Returns emotion label or None."""
