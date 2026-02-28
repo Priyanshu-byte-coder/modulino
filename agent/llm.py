@@ -3,6 +3,7 @@ LLM integration module using Ollama (local inference).
 Communicates with Ollama's REST API for fully offline operation.
 """
 
+import json
 import logging
 from typing import Optional
 
@@ -15,6 +16,7 @@ from config.config import (
     LLM_MAX_TOKENS,
     LLM_NUM_CTX,
     LLM_NUM_THREAD,
+    LLM_TIMEOUT,
 )
 
 logger = logging.getLogger(__name__)
@@ -53,12 +55,12 @@ class LLMClient:
             return False
 
     def generate(self, prompt: str, system: str = "") -> str:
-        """Single-shot generation via /api/generate."""
+        """Single-shot generation via /api/generate with streaming."""
         payload = {
             "model": self.model,
             "prompt": prompt,
             "system": system,
-            "stream": False,
+            "stream": True,
             "options": {
                 "temperature": self.temperature,
                 "num_predict": self.max_tokens,
@@ -70,10 +72,19 @@ class LLMClient:
             resp = requests.post(
                 f"{self.base_url}/api/generate",
                 json=payload,
-                timeout=120,
+                timeout=LLM_TIMEOUT,
+                stream=True,
             )
             resp.raise_for_status()
-            return resp.json().get("response", "").strip()
+            full_response = []
+            for line in resp.iter_lines():
+                if line:
+                    chunk = json.loads(line)
+                    token = chunk.get("response", "")
+                    full_response.append(token)
+                    if chunk.get("done", False):
+                        break
+            return "".join(full_response).strip()
         except requests.ConnectionError:
             logger.error("Cannot connect to Ollama. Is it running?")
             return "[Error: LLM server unavailable. Please start Ollama.]"
@@ -85,11 +96,11 @@ class LLMClient:
             return f"[Error: {e}]"
 
     def chat(self, messages: list[dict]) -> str:
-        """Chat-style generation via /api/chat."""
+        """Chat-style generation via /api/chat with streaming."""
         payload = {
             "model": self.model,
             "messages": messages,
-            "stream": False,
+            "stream": True,
             "options": {
                 "temperature": self.temperature,
                 "num_predict": self.max_tokens,
@@ -101,10 +112,19 @@ class LLMClient:
             resp = requests.post(
                 f"{self.base_url}/api/chat",
                 json=payload,
-                timeout=120,
+                timeout=LLM_TIMEOUT,
+                stream=True,
             )
             resp.raise_for_status()
-            return resp.json().get("message", {}).get("content", "").strip()
+            full_response = []
+            for line in resp.iter_lines():
+                if line:
+                    chunk = json.loads(line)
+                    token = chunk.get("message", {}).get("content", "")
+                    full_response.append(token)
+                    if chunk.get("done", False):
+                        break
+            return "".join(full_response).strip()
         except requests.ConnectionError:
             logger.error("Cannot connect to Ollama. Is it running?")
             return "[Error: LLM server unavailable. Please start Ollama.]"

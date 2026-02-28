@@ -63,7 +63,7 @@ class AgentBrain:
         system_prompt = self._build_system_prompt(mental_state, memory_context)
         self._conversation_history.append({"role": "user", "content": user_input})
 
-        messages = [{"role": "system", "content": system_prompt}] + self._conversation_history[-10:]
+        messages = [{"role": "system", "content": system_prompt}] + self._conversation_history[-4:]
         response = self.llm.chat(messages)
 
         self._conversation_history.append({"role": "assistant", "content": response})
@@ -83,56 +83,26 @@ class AgentBrain:
         return response
 
     def _build_system_prompt(self, mental_state, memory_context: str) -> str:
-        """Construct the full system prompt with emotional context."""
+        """Construct a compact system prompt for CPU inference."""
         parts = [SYSTEM_PROMPT]
-        
-        # Add critical instruction to prevent context leakage
-        parts.append(
-            "\n\n**IMPORTANT**: The following context is for YOUR INTERNAL USE ONLY. "
-            "NEVER include any of the sections below (User Emotional Context, Past Conversations, Notes) "
-            "in your response to the user. Respond naturally as a compassionate companion without "
-            "mentioning sentiment scores, emotion labels, or metadata."
-        )
-        
-        parts.append(
-            f"\n\n=== INTERNAL CONTEXT (DO NOT MENTION IN RESPONSE) ===\n"
-            f"User Emotional State:\n{mental_state.to_context_string()}"
-        )
+
+        parts.append(f"\nUser mood: {mental_state.dominant_emotion}.")
+
+        if mental_state.emotional_trend == "declining":
+            parts.append("Be extra gentle.")
 
         if memory_context:
-            parts.append(
-                f"\n\nRelevant Past Conversations (USE THESE FOR CONTINUITY):\n"
-                f"The following are the most relevant past exchanges with this user. "
-                f"Use them to maintain conversational continuity, remember their name, "
-                f"recall previous topics, and show you're paying attention.\n\n"
-                f"{memory_context}"
-            )
+            parts.append(f"\nContext:\n{memory_context}")
 
-        # Tone guidance based on emotional state
-        if mental_state.emotional_trend == "declining":
-            parts.append(
-                "\n\nGuidance: The user's mood appears to be declining. "
-                "Be extra gentle, validating, and supportive."
-            )
-        elif mental_state.dominant_emotion in ("sad", "fear", "angry"):
-            parts.append(
-                "\n\nGuidance: The user seems distressed. Prioritize empathy and "
-                "active listening before offering any suggestions."
-            )
-        
-        parts.append("\n=== END INTERNAL CONTEXT ===\n")
-
-        return "\n".join(parts)
+        return " ".join(parts)
 
     def _format_memories(self, memories) -> str:
         """Format retrieved memories into a context string for the LLM."""
         if not memories:
             return ""
         lines = []
-        for i, m in enumerate(memories[:5], 1):  # Top 5 most relevant
+        for i, m in enumerate(memories[:2], 1):  # Top 2 most relevant
             lines.append(
-                f"{i}. User: \"{m.user_message[:200]}\"\n"
-                f"   You responded: \"{m.assistant_response[:200]}\"\n"
-                f"   (Context: {m.sentiment_label} mood, {m.emotion} emotion)"
+                f"{i}. User said: \"{m.user_message[:80]}\""
             )
         return "\n".join(lines)
