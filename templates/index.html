@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maya - Wellbeing AI Companion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            height: 90vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .status-bar {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .status-indicator {
+            display: flex;
+            gap: 15px;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #dc3545;
+        }
+
+        .status-dot.active {
+            background: #28a745;
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: #667eea;
+        }
+
+        .message.assistant .message-avatar {
+            background: #764ba2;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-content {
+            background: #667eea;
+            color: white;
+        }
+
+        .message.assistant .message-content {
+            background: white;
+            color: #333;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .emotion-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #ffc107;
+            color: #333;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        .input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            display: flex;
+            gap: 10px;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        #messageInput:focus {
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            outline: none;
+        }
+
+        #sendButton {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        #sendButton:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        #sendButton:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #cameraButton {
+            background: #28a745;
+            color: white;
+            padding: 12px 20px;
+        }
+
+        #cameraButton:hover:not(:disabled) {
+            background: #218838;
+        }
+
+        #cameraButton:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 10px;
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+
+        .welcome-message h2 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        #resetButton {
+            background: #dc3545;
+            color: white;
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+
+        #resetButton:hover {
+            background: #c82333;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                height: 100vh;
+                border-radius: 0;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            #cameraButton {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💙 Maya</h1>
+            <p>Your Wellbeing AI Companion</p>
+        </div>
+
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="status-item">
+                    <span class="status-dot" id="llmStatus"></span>
+                    <span>LLM</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot" id="memoryStatus"></span>
+                    <span>Memory</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-dot" id="cameraStatus"></span>
+                    <span>Camera</span>
+                </div>
+            </div>
+            <div class="controls">
+                <button id="resetButton">Reset Chat</button>
+            </div>
+        </div>
+
+        <div class="chat-container" id="chatContainer">
+            <div class="welcome-message">
+                <h2>Welcome! 👋</h2>
+                <p>I'm Maya, your supportive AI companion. How are you feeling today?</p>
+            </div>
+        </div>
+
+        <div class="loading" id="loadingIndicator">
+            <span>Maya is thinking...</span>
+        </div>
+
+        <div class="input-container">
+            <div class="input-wrapper">
+                <input 
+                    type="text" 
+                    id="messageInput" 
+                    placeholder="Type your message here..." 
+                    autocomplete="off"
+                />
+                <button id="sendButton">Send</button>
+            </div>
+            <button id="cameraButton" title="Capture emotion from camera">📷</button>
+        </div>
+    </div>
+
+    <script>
+        const chatContainer = document.getElementById('chatContainer');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const cameraButton = document.getElementById('cameraButton');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const resetButton = document.getElementById('resetButton');
+
+        let cameraEnabled = false;
+
+        async function checkStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                
+                document.getElementById('llmStatus').classList.toggle('active', data.status.llm);
+                document.getElementById('memoryStatus').classList.toggle('active', data.status.memory);
+                document.getElementById('cameraStatus').classList.toggle('active', data.status.camera);
+                
+                cameraEnabled = data.camera_enabled && data.status.camera;
+                cameraButton.disabled = !cameraEnabled;
+                
+                if (!data.status.llm) {
+                    addMessage('assistant', '⚠️ Ollama is not running. Please start Ollama and refresh the page.');
+                }
+            } catch (error) {
+                console.error('Status check failed:', error);
+            }
+        }
+
+        function addMessage(role, content, emotion = null) {
+            const welcomeMsg = chatContainer.querySelector('.welcome-message');
+            if (welcomeMsg) {
+                welcomeMsg.remove();
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = role === 'user' ? '👤' : '💙';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.textContent = content;
+            
+            if (emotion) {
+                const emotionBadge = document.createElement('div');
+                emotionBadge.className = 'emotion-badge';
+                emotionBadge.textContent = `😊 Detected: ${emotion}`;
+                contentDiv.appendChild(emotionBadge);
+            }
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(contentDiv);
+            chatContainer.appendChild(messageDiv);
+            
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        async function sendMessage(captureEmotion = false) {
+            const message = messageInput.value.trim();
+            if (!message) return;
+            
+            addMessage('user', message);
+            messageInput.value = '';
+            
+            sendButton.disabled = true;
+            cameraButton.disabled = true;
+            loadingIndicator.classList.add('active');
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        capture_emotion: captureEmotion
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    addMessage('assistant', `Error: ${data.error}`);
+                } else {
+                    addMessage('assistant', data.response, data.face_emotion);
+                }
+            } catch (error) {
+                console.error('Send message failed:', error);
+                addMessage('assistant', '⚠️ Failed to send message. Please check your connection.');
+            } finally {
+                sendButton.disabled = false;
+                cameraButton.disabled = !cameraEnabled;
+                loadingIndicator.classList.remove('active');
+                messageInput.focus();
+            }
+        }
+
+        async function resetConversation() {
+            if (!confirm('Are you sure you want to reset the conversation?')) {
+                return;
+            }
+            
+            try {
+                await fetch('/api/reset', { method: 'POST' });
+                chatContainer.innerHTML = `
+                    <div class="welcome-message">
+                        <h2>Chat Reset 🔄</h2>
+                        <p>Let's start fresh! How can I support you today?</p>
+                    </div>
+                `;
+            } catch (error) {
+                console.error('Reset failed:', error);
+            }
+        }
+
+        sendButton.addEventListener('click', () => sendMessage(false));
+        cameraButton.addEventListener('click', () => sendMessage(true));
+        resetButton.addEventListener('click', resetConversation);
+        
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage(false);
+            }
+        });
+
+        checkStatus();
+        setInterval(checkStatus, 30000);
+    </script>
+</body>
+</html>

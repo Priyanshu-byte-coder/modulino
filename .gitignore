@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Data & Memory (will be created on device)
+data/
+*.sqlite3
+*.db
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+*.bak
+
+# Temporary files
+*.tmp
+.cache/
+
+# Model files (downloaded via Ollama)
+models/
+
+# Environment variables
+.env
