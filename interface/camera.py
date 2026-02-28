@@ -8,7 +8,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Optional
 
-from config.config import CAMERA_ENABLED
+from config.config import CAMERA_ENABLED, CAMERA_INDEX
 
 logger = logging.getLogger(__name__)
 
@@ -43,15 +43,16 @@ class WebcamCamera(BaseCamera):
             import cv2
             from fer import FER
 
-            self._cap = cv2.VideoCapture(0)
+            logger.info(f"Attempting to open camera at index {CAMERA_INDEX}")
+            self._cap = cv2.VideoCapture(CAMERA_INDEX)
             if not self._cap.isOpened():
-                logger.warning("Failed to open webcam.")
+                logger.warning(f"Failed to open webcam at index {CAMERA_INDEX}.")
                 self._cap = None
                 return
 
             self._detector = FER(mtcnn=False)
             self._initialized = True
-            logger.info("Webcam emotion detection initialized (FER).")
+            logger.info(f"Webcam emotion detection initialized (FER) on /dev/video{CAMERA_INDEX}.")
         except ImportError as e:
             logger.warning("FER or OpenCV not available: %s", e)
             self._cap = None
@@ -106,7 +107,7 @@ class WebcamCamera(BaseCamera):
         try:
             import cv2
 
-            cap = cv2.VideoCapture(0)
+            cap = cv2.VideoCapture(CAMERA_INDEX)
             ok = cap.isOpened()
             cap.release()
             return ok
