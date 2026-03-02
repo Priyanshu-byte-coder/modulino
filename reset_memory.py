@@ -31,16 +31,11 @@ def reset_memory():
         return
     
     try:
-        # Count entries before deletion
-        try:
-            import chromadb
-            client = chromadb.PersistentClient(path=str(MEMORY_DIR))
-            collection = client.get_collection(name=MEMORY_COLLECTION)
-            count = collection.count()
-            print(f"\nFound {count} conversation entries.")
-        except:
-            count = "unknown"
-            print(f"\nMemory directory exists.")
+        # Note: We skip counting entries using chromadb.PersistentClient here
+        # because on Windows, initializing the client locks the SQLite database 
+        # files, which causes the subsequent shutil.rmtree() to fail with 
+        # [WinError 32] Permission denied.
+        print(f"\nMemory directory exists. Proceeding with deletion...")
         
         # Delete the directory
         shutil.rmtree(MEMORY_DIR)

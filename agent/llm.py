@@ -97,8 +97,8 @@ class LLMClient:
             logger.error("LLM generation error: %s", e)
             return f"[Error: {e}]"
 
-    def chat(self, messages: list[dict]) -> str:
-        """Chat-style generation via /api/chat with streaming."""
+    def chat(self, messages: list[dict], stream_output: bool = False):
+        """Chat-style generation via /api/chat with streaming support."""
         payload = {
             "model": self.model,
             "messages": messages,
@@ -119,21 +119,37 @@ class LLMClient:
                 stream=True,
             )
             resp.raise_for_status()
-            full_response = []
-            for line in resp.iter_lines():
-                if line:
-                    chunk = json.loads(line)
-                    token = chunk.get("message", {}).get("content", "")
-                    full_response.append(token)
-                    if chunk.get("done", False):
-                        break
-            return "".join(full_response).strip()
+            
+            if stream_output:
+                def generate():
+                    for line in resp.iter_lines():
+                        if line:
+                            chunk = json.loads(line)
+                            token = chunk.get("message", {}).get("content", "")
+                            if token:
+                                yield token
+                            if chunk.get("done", False):
+                                break
+                return generate()
+            else:
+                full_response = []
+                for line in resp.iter_lines():
+                    if line:
+                        chunk = json.loads(line)
+                        token = chunk.get("message", {}).get("content", "")
+                        full_response.append(token)
+                        if chunk.get("done", False):
+                            break
+                return "".join(full_response).strip()
         except requests.ConnectionError:
             logger.error("Cannot connect to Ollama. Is it running?")
-            return "[Error: LLM server unavailable. Please start Ollama.]"
+            error_msg = "[Error: LLM server unavailable. Please start Ollama.]"
+            return [error_msg] if stream_output else error_msg
         except requests.Timeout:
             logger.error("LLM request timed out.")
-            return "[Error: LLM request timed out.]"
+            error_msg = "[Error: LLM request timed out.]"
+            return [error_msg] if stream_output else error_msg
         except Exception as e:
             logger.error("LLM chat error: %s", e)
-            return f"[Error: {e}]"
+            error_msg = f"[Error: {e}]"
+            return [error_msg] if stream_output else error_msg

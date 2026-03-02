@@ -6,6 +6,7 @@ Provides a browser-based interface accessible on Raspberry Pi.
 import logging
 import sys
 import base64
+import json
 from flask import Flask, render_template, request, jsonify, Response
 from flask_cors import CORS
 import cv2
@@ -103,6 +104,46 @@ def chat():
     except Exception as e:
         logger.error(f"Error processing message: {e}", exc_info=True)
         return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/chat_stream', methods=['POST'])
+def chat_stream():
+    """Process a chat message and stream the response via SSE."""
+    global brain, camera, turn_count
+    
+    if brain is None:
+        initialize_agent()
+    
+    data = request.json
+    user_message = data.get('message', '').strip()
+    capture_emotion = data.get('capture_emotion', False)
+    
+    if not user_message:
+        return jsonify({"error": "Empty message"}), 400
+    
+    turn_count += 1
+    face_emotion = None
+    
+    if capture_emotion and CAMERA_ENABLED and camera.is_available():
+        logger.info("Capturing emotion from camera...")
+        face_emotion = camera.capture_emotion()
+        logger.info(f"Detected emotion: {face_emotion}")
+    
+    def generate():
+        try:
+            if face_emotion:
+                yield f"data: {json.dumps({'type': 'emotion', 'emotion': face_emotion})}\n\n"
+            
+            response_generator = brain.process(user_message, face_emotion=face_emotion, stream=True)
+            for token in response_generator:
+                yield f"data: {json.dumps({'type': 'token', 'token': token})}\n\n"
+                
+            yield f"data: {json.dumps({'type': 'done'})}\n\n"
+        except Exception as e:
+            logger.error(f"Error processing message stream: {e}", exc_info=True)
+            yield f"data: {json.dumps({'type': 'error', 'error': str(e)})}\n\n"
+            
+    return Response(generate(), mimetype='text/event-stream')
 
 
 @app.route('/api/camera/snapshot', methods=['GET'])

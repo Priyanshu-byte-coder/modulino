@@ -4,436 +4,509 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Maya - Wellbeing AI Companion</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #7b9acc;
+            --primary-light: #a4bde2;
+            --accent-color: #8da4c8;
+            --text-main: #4a5568;
+            --text-light: #718096;
+            --bg-gradient: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Quicksand', sans-serif;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--bg-gradient);
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 800px;
-            height: 90vh;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            display: flex;
-            flex-direction: column;
+            color: var(--text-main);
             overflow: hidden;
         }
 
+        .layout-container {
+            width: 100%;
+            max-width: 1200px;
+            height: 90vh;
+            display: flex;
+            gap: 20px;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow: var(--glass-shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Chat Section */
+        .chat-section {
+            flex: 7;
+            display: flex;
+            flex-direction: column;
+        }
+
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 24px 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.4);
         }
 
         .header h1 {
-            font-size: 28px;
-            margin-bottom: 5px;
+            font-size: 26px;
+            color: var(--primary-color);
+            font-weight: 700;
         }
 
         .header p {
             font-size: 14px;
-            opacity: 0.9;
+            color: var(--text-light);
+            font-weight: 500;
         }
 
-        .status-bar {
-            padding: 10px 20px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 12px;
-        }
-
-        .status-indicator {
+        .status-indicators {
             display: flex;
             gap: 15px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-light);
         }
 
         .status-item {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
         }
 
         .status-dot {
-            width: 8px;
-            height: 8px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
-            background: #dc3545;
+            background: #e2e8f0;
+            transition: background 0.3s;
         }
-
-        .status-dot.active {
-            background: #28a745;
-        }
+        .status-dot.active { background: #48bb78; }
 
         .chat-container {
             flex: 1;
             overflow-y: auto;
-            padding: 20px;
-            background: #f8f9fa;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Scrollbar */
+        .chat-container::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-container::-webkit-scrollbar-thumb {
+            background-color: rgba(160, 174, 192, 0.5);
+            border-radius: 10px;
         }
 
         .message {
-            margin-bottom: 20px;
             display: flex;
-            gap: 10px;
-            animation: fadeIn 0.3s ease-in;
+            gap: 15px;
+            animation: fadeIn 0.4s ease-out forwards;
+            max-width: 85%;
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .message.user {
+            align-self: flex-end;
             flex-direction: row-reverse;
         }
+        .message.assistant {
+            align-self: flex-start;
+        }
 
-        .message-avatar {
-            width: 40px;
-            height: 40px;
+        .avatar {
+            width: 45px;
+            height: 45px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 22px;
             flex-shrink: 0;
-        }
-
-        .message.user .message-avatar {
-            background: #667eea;
-        }
-
-        .message.assistant .message-avatar {
-            background: #764ba2;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            background: white;
         }
 
         .message-content {
-            max-width: 70%;
-            padding: 12px 16px;
-            border-radius: 18px;
+            padding: 16px 20px;
+            border-radius: 20px;
+            font-size: 15px;
             line-height: 1.5;
-            word-wrap: break-word;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.02);
         }
 
         .message.user .message-content {
-            background: #667eea;
+            background: var(--primary-color);
             color: white;
+            border-top-right-radius: 4px;
         }
 
         .message.assistant .message-content {
-            background: white;
-            color: #333;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.85);
+            color: var(--text-main);
+            border-top-left-radius: 4px;
         }
 
-        .emotion-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            background: #ffc107;
-            color: #333;
-            border-radius: 12px;
-            font-size: 11px;
-            margin-top: 5px;
-            font-weight: 500;
+        .typing-indicator {
+            display: inline-flex;
+            gap: 4px;
+            align-items: center;
+            height: 20px;
+            padding: 0 5px;
+        }
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--primary-light);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
         }
 
-        .input-container {
-            padding: 20px;
-            background: white;
-            border-top: 1px solid #e9ecef;
+        .input-area {
+            padding: 20px 30px;
+            background: rgba(255, 255, 255, 0.4);
+            border-top: 1px solid rgba(255, 255, 255, 0.5);
             display: flex;
-            gap: 10px;
+            gap: 15px;
+            align-items: center;
         }
 
         .input-wrapper {
             flex: 1;
-            display: flex;
-            gap: 10px;
-        }
-
-        #messageInput {
-            flex: 1;
-            padding: 12px 16px;
-            border: 2px solid #e9ecef;
-            border-radius: 25px;
-            font-size: 14px;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        #messageInput:focus {
-            border-color: #667eea;
-        }
-
-        button {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 25px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            outline: none;
-        }
-
-        #sendButton {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        #sendButton:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-
-        #sendButton:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        #cameraButton {
-            background: #28a745;
-            color: white;
-            padding: 12px 20px;
-        }
-
-        #cameraButton:hover:not(:disabled) {
-            background: #218838;
-        }
-
-        #cameraButton:disabled {
-            background: #6c757d;
-            cursor: not-allowed;
-        }
-
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 10px;
-            color: #6c757d;
-            font-size: 14px;
-        }
-
-        .loading.active {
-            display: block;
-        }
-
-        .welcome-message {
-            text-align: center;
-            padding: 40px 20px;
-            color: #6c757d;
-        }
-
-        .welcome-message h2 {
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-
-        .controls {
-            display: flex;
-            gap: 10px;
-        }
-
-        #resetButton {
-            background: #dc3545;
-            color: white;
-            padding: 8px 16px;
-            font-size: 12px;
-        }
-
-        #resetButton:hover {
-            background: #c82333;
-        }
-
-        .camera-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .camera-modal.active {
-            display: flex;
-        }
-
-        .camera-content {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            max-width: 90%;
-            max-height: 90%;
             position: relative;
         }
 
-        .camera-preview {
-            max-width: 100%;
-            border-radius: 10px;
-            margin-bottom: 15px;
+        #messageInput {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid transparent;
+            border-radius: 30px;
+            font-size: 15px;
+            background: rgba(255, 255, 255, 0.7);
+            outline: none;
+            transition: all 0.3s ease;
+            color: var(--text-main);
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.02);
         }
 
-        .camera-controls {
+        #messageInput:focus {
+            background: white;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 4px rgba(123, 154, 204, 0.1);
+        }
+        
+        #messageInput::placeholder {
+            color: var(--text-light);
+            opacity: 0.7;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
             display: flex;
-            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            outline: none;
+        }
+
+        .btn-send {
+            padding: 16px 30px;
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(123, 154, 204, 0.3);
+        }
+
+        .btn-send:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(123, 154, 204, 0.4);
+            background: #6a88b5;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* Sidebar Section */
+        .sidebar {
+            flex: 3;
+            display: flex;
+            flex-direction: column;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+            text-align: center;
+            background: rgba(255,255,255,0.3);
+        }
+
+        .sidebar-header h2 {
+            font-size: 18px;
+            color: var(--primary-color);
+        }
+
+        .emotion-container {
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            flex: 1;
+        }
+
+        .camera-feed {
+            width: 100%;
+            aspect-ratio: 4/3;
+            background: rgba(0,0,0,0.05);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
             justify-content: center;
         }
 
-        .close-modal {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #dc3545;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            cursor: pointer;
+        .camera-feed img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+        
+        .camera-placeholder {
+            color: var(--text-light);
+            font-size: 14px;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .emotion-display {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            transition: all 0.3s ease;
+        }
+
+        .emotion-emoji {
+            font-size: 48px;
+            margin-bottom: 10px;
+            display: inline-block;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .emotion-text {
             font-size: 18px;
+            font-weight: 700;
+            color: var(--text-main);
+            text-transform: capitalize;
+        }
+        
+        .emotion-loader {
+            font-size: 13px;
+            color: var(--text-light);
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .btn-reset {
+            margin: 20px;
+            padding: 12px;
+            background: rgba(255,255,255,0.7);
+            color: var(--text-light);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        .btn-reset:hover {
+            background: white;
+            color: #e53e3e;
         }
 
-        #previewButton {
-            background: #17a2b8;
-            color: white;
-            padding: 8px 16px;
-            font-size: 12px;
-        }
-
-        #previewButton:hover {
-            background: #138496;
-        }
-
-        @media (max-width: 768px) {
-            .container {
+        @media (max-width: 900px) {
+            body { padding: 0; }
+            .layout-container {
                 height: 100vh;
                 border-radius: 0;
-            }
-
-            .message-content {
-                max-width: 85%;
-            }
-
-            .controls {
                 flex-direction: column;
+                max-width: 100%;
             }
-
-            #cameraButton {
-                width: 100%;
+            .glass-panel {
+                border-radius: 0;
+                border: none;
+            }
+            .sidebar {
+                flex: none;
+                height: 250px;
+                border-top: 1px solid rgba(255,255,255,0.5);
+                flex-direction: row;
+                align-items: center;
+            }
+            .sidebar-header {
+                display: none;
+            }
+            .emotion-container {
+                flex-direction: row;
+                padding: 15px;
+            }
+            .camera-feed {
+                width: 150px;
+                height: 100%;
+            }
+            .emotion-display {
+                margin: 0;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>💙 Maya</h1>
-            <p>Your Wellbeing AI Companion</p>
-        </div>
-
-        <div class="status-bar">
-            <div class="status-indicator">
-                <div class="status-item">
-                    <span class="status-dot" id="llmStatus"></span>
-                    <span>LLM</span>
+    <div class="layout-container">
+        <!-- Main Chat Area -->
+        <main class="glass-panel chat-section">
+            <header class="header">
+                <div>
+                    <h1>Maya</h1>
+                    <p>Your Peaceful Wellbeing Space</p>
                 </div>
-                <div class="status-item">
-                    <span class="status-dot" id="memoryStatus"></span>
-                    <span>Memory</span>
+                <div class="status-indicators">
+                    <div class="status-item"><div class="status-dot" id="llmStatus"></div> LLM</div>
+                    <div class="status-item"><div class="status-dot" id="memoryStatus"></div> Memory</div>
+                    <div class="status-item"><div class="status-dot" id="cameraStatus"></div> Camera</div>
                 </div>
-                <div class="status-item">
-                    <span class="status-dot" id="cameraStatus"></span>
-                    <span>Camera</span>
+            </header>
+
+            <div class="chat-container" id="chatContainer">
+                <!-- Welcome Message -->
+                <div class="message assistant">
+                    <div class="avatar">💙</div>
+                    <div class="message-content">
+                        Hello. I'm Maya, your supportive AI companion. Take a deep breath. How are you feeling today?
+                    </div>
                 </div>
             </div>
-            <div class="controls">
-                <button id="previewButton">📷 Preview Camera</button>
-                <button id="resetButton">Reset Chat</button>
-            </div>
-        </div>
 
-        <div class="chat-container" id="chatContainer">
-            <div class="welcome-message">
-                <h2>Welcome! 👋</h2>
-                <p>I'm Maya, your supportive AI companion. How are you feeling today?</p>
+            <div class="input-area">
+                <div class="input-wrapper">
+                    <input type="text" id="messageInput" placeholder="Share your thoughts..." autocomplete="off">
+                </div>
+                <button class="btn btn-send" id="sendButton">Send</button>
             </div>
-        </div>
+        </main>
 
-        <div class="loading" id="loadingIndicator">
-            <span>Maya is thinking...</span>
-        </div>
-
-        <div class="input-container">
-            <div class="input-wrapper">
-                <input 
-                    type="text" 
-                    id="messageInput" 
-                    placeholder="Type your message here..." 
-                    autocomplete="off"
-                />
-                <button id="sendButton">Send</button>
+        <!-- Emotion Sidebar -->
+        <aside class="glass-panel sidebar">
+            <div class="sidebar-header">
+                <h2>Continuous Emotion Monitor</h2>
             </div>
-            <button id="cameraButton" title="Capture emotion from camera">📷</button>
-        </div>
-    </div>
-
-    <!-- Camera Preview Modal -->
-    <div class="camera-modal" id="cameraModal">
-        <div class="camera-content">
-            <button class="close-modal" id="closeModal">×</button>
-            <h3 style="text-align: center; margin-bottom: 15px;">📷 Camera Emotion Detection</h3>
-            <img id="cameraPreview" class="camera-preview" alt="Camera preview">
-            <p id="emotionText" style="text-align: center; font-size: 18px; font-weight: bold; color: #667eea;"></p>
-            <div class="camera-controls">
-                <button id="refreshPreview" style="background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 20px; cursor: pointer;">🔄 Refresh</button>
+            
+            <div class="emotion-container">
+                <div class="camera-feed">
+                    <div class="camera-placeholder" id="cameraPlaceholder">
+                        Detecting camera...<br><small>Please allow permissions</small>
+                    </div>
+                    <img id="cameraPreview" alt="Live Emotion Detection">
+                </div>
+                
+                <div class="emotion-display">
+                    <div class="emotion-emoji" id="emotionEmoji">✨</div>
+                    <div class="emotion-text" id="emotionText">Sensing...</div>
+                    <div class="emotion-loader">
+                        <span class="typing-dot" style="animation: none; width: 4px; height: 4px;"></span>
+                        <span id="emotionSubtext">Listening to your face</span>
+                        <span class="typing-dot" style="animation: none; width: 4px; height: 4px;"></span>
+                    </div>
+                </div>
             </div>
-        </div>
+            
+            <button class="btn btn-reset" id="resetButton">Reset Conversation</button>
+        </aside>
     </div>
 
     <script>
+        // DOM Elements
         const chatContainer = document.getElementById('chatContainer');
         const messageInput = document.getElementById('messageInput');
         const sendButton = document.getElementById('sendButton');
-        const cameraButton = document.getElementById('cameraButton');
-        const loadingIndicator = document.getElementById('loadingIndicator');
         const resetButton = document.getElementById('resetButton');
-        const previewButton = document.getElementById('previewButton');
-        const cameraModal = document.getElementById('cameraModal');
-        const closeModal = document.getElementById('closeModal');
+        
         const cameraPreview = document.getElementById('cameraPreview');
+        const cameraPlaceholder = document.getElementById('cameraPlaceholder');
+        const emotionEmoji = document.getElementById('emotionEmoji');
         const emotionText = document.getElementById('emotionText');
-        const refreshPreview = document.getElementById('refreshPreview');
+        const emotionSubtext = document.getElementById('emotionSubtext');
 
         let cameraEnabled = false;
+        let lastDetectedEmotion = null;
+        let emotionPollInterval = null;
 
+        const EMOTION_MAP = {
+            'happy': { emoji: '😊', color: '#f6e05e', label: 'Happy' },
+            'sad': { emoji: '😢', color: '#90cdf4', label: 'Sad' },
+            'angry': { emoji: '😠', color: '#fc8181', label: 'Angry' },
+            'fear': { emoji: '😨', color: '#d6bcfa', label: 'Afraid' },
+            'surprise': { emoji: '😲', color: '#fbd38d', label: 'Surprised' },
+            'neutral': { emoji: '😌', color: '#e2e8f0', label: 'Calm / Neutral' },
+            'disgust': { emoji: '🤢', color: '#9ae6b4', label: 'Disgusted' }
+        };
+
+        // System Status Check
         async function checkStatus() {
             try {
                 const response = await fetch('/api/status');
@@ -444,177 +517,187 @@
                 document.getElementById('cameraStatus').classList.toggle('active', data.status.camera);
                 
                 cameraEnabled = data.camera_enabled && data.status.camera;
-                cameraButton.disabled = !cameraEnabled;
                 
-                if (!data.status.llm) {
-                    addMessage('assistant', '⚠️ Ollama is not running. Please start Ollama and refresh the page.');
+                if (cameraEnabled && !emotionPollInterval) {
+                    startEmotionPolling();
+                } else if (!cameraEnabled && emotionPollInterval) {
+                    stopEmotionPolling();
+                    cameraPlaceholder.style.display = 'block';
+                    cameraPreview.style.display = 'none';
+                    cameraPlaceholder.textContent = 'Camera disabled or unavailable';
                 }
             } catch (error) {
                 console.error('Status check failed:', error);
             }
         }
 
-        function addMessage(role, content, emotion = null) {
-            const welcomeMsg = chatContainer.querySelector('.welcome-message');
-            if (welcomeMsg) {
-                welcomeMsg.remove();
-            }
-
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${role}`;
-            
-            const avatar = document.createElement('div');
-            avatar.className = 'message-avatar';
-            avatar.textContent = role === 'user' ? '👤' : '💙';
-            
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
-            contentDiv.textContent = content;
-            
-            if (emotion) {
-                const emotionBadge = document.createElement('div');
-                emotionBadge.className = 'emotion-badge';
-                emotionBadge.textContent = `😊 Detected: ${emotion}`;
-                contentDiv.appendChild(emotionBadge);
-            }
-            
-            messageDiv.appendChild(avatar);
-            messageDiv.appendChild(contentDiv);
-            chatContainer.appendChild(messageDiv);
-            
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
-
-        async function sendMessage(captureEmotion = false) {
-            const message = messageInput.value.trim();
-            if (!message) return;
-            
-            addMessage('user', message);
-            messageInput.value = '';
-            
-            sendButton.disabled = true;
-            cameraButton.disabled = true;
-            loadingIndicator.classList.add('active');
-            
+        // Emotion Polling
+        async function pollEmotion() {
+            if (!cameraEnabled) return;
             try {
-                const response = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        message: message,
-                        capture_emotion: captureEmotion
-                    })
-                });
-                
+                const response = await fetch('/api/camera/snapshot');
+                if (!response.ok) return;
                 const data = await response.json();
                 
-                if (data.error) {
-                    addMessage('assistant', `Error: ${data.error}`);
-                } else {
-                    addMessage('assistant', data.response, data.face_emotion);
+                if (data.image) {
+                    cameraPreview.src = data.image;
+                    cameraPreview.style.display = 'block';
+                    cameraPlaceholder.style.display = 'none';
                 }
+                
+                if (data.emotion && EMOTION_MAP[data.emotion]) {
+                    lastDetectedEmotion = data.emotion;
+                    const emoInfo = EMOTION_MAP[data.emotion];
+                    emotionEmoji.textContent = emoInfo.emoji;
+                    emotionText.textContent = emoInfo.label;
+                    emotionSubtext.textContent = 'Detected live';
+                } else if (!data.emotion && lastDetectedEmotion === null) {
+                    emotionEmoji.textContent = '✨';
+                    emotionText.textContent = 'Looking for face...';
+                }
+            } catch (err) {
+                console.warn('Emotion polling error', err);
+            }
+        }
+
+        function startEmotionPolling() {
+            pollEmotion(); // Immediate first poll
+            emotionPollInterval = setInterval(pollEmotion, 2500); // Poll every 2.5s
+        }
+
+        function stopEmotionPolling() {
+            if (emotionPollInterval) {
+                clearInterval(emotionPollInterval);
+                emotionPollInterval = null;
+            }
+        }
+
+        // Chat UI Helpers
+        function createMessageElement(role, initialText = '') {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${role}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.textContent = role === 'user' ? '👤' : '💙';
+            
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            content.textContent = initialText;
+            
+            msgDiv.appendChild(avatar);
+            msgDiv.appendChild(content);
+            chatContainer.appendChild(msgDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            return content;
+        }
+
+        function createTypingIndicator() {
+            const div = document.createElement('div');
+            div.className = 'typing-indicator';
+            div.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+            return div;
+        }
+
+        // SSE Streaming Chat
+        async function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text) return;
+            
+            messageInput.value = '';
+            sendButton.disabled = true;
+            messageInput.disabled = true;
+            
+            // Add user message
+            createMessageElement('user', text);
+            
+            // Add Assistant blank message with typing indicator
+            const assistantContent = createMessageElement('assistant', '');
+            assistantContent.appendChild(createTypingIndicator());
+            
+            try {
+                const response = await fetch('/api/chat_stream', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: text,
+                        capture_emotion: true // We can still trigger backend log of emotion
+                    })
+                });
+
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder('utf-8');
+                let assistantText = '';
+
+                // Remove typing indicator right before first chunk
+                let isFirstChunk = true;
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunkStr = decoder.decode(value, { stream: true });
+                    const lines = chunkStr.split('\n');
+                    
+                    for (let line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.substring(6));
+                                if (data.type === 'token') {
+                                    if (isFirstChunk) {
+                                        assistantContent.innerHTML = ''; // clear typing indicator
+                                        isFirstChunk = false;
+                                    }
+                                    assistantText += data.token;
+                                    assistantContent.textContent = assistantText;
+                                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                                } else if (data.type === 'error') {
+                                    assistantContent.textContent += `\n[Error: ${data.error}]`;
+                                }
+                            } catch (e) {
+                                console.warn('JSON parse error on chunk:', e, line);
+                            }
+                        }
+                    }
+                }
+                
+                // If the stream yielded nothing for some reason, remove the dots
+                if (isFirstChunk) {
+                    assistantContent.innerHTML = '';
+                    assistantContent.textContent = 'Sorry, I got disconnected.';
+                }
+                
             } catch (error) {
-                console.error('Send message failed:', error);
-                addMessage('assistant', '⚠️ Failed to send message. Please check your connection.');
+                console.error('Chat error:', error);
+                assistantContent.innerHTML = '';
+                assistantContent.textContent = 'Oops, something went wrong. Let\'s try again.';
             } finally {
                 sendButton.disabled = false;
-                cameraButton.disabled = !cameraEnabled;
-                loadingIndicator.classList.remove('active');
+                messageInput.disabled = false;
                 messageInput.focus();
             }
         }
 
-        async function resetConversation() {
-            if (!confirm('Are you sure you want to reset the conversation?')) {
-                return;
-            }
-            
-            try {
-                await fetch('/api/reset', { method: 'POST' });
-                chatContainer.innerHTML = `
-                    <div class="welcome-message">
-                        <h2>Chat Reset 🔄</h2>
-                        <p>Let's start fresh! How can I support you today?</p>
-                    </div>
-                `;
-            } catch (error) {
-                console.error('Reset failed:', error);
-            }
-        }
-
-        async function showCameraPreview() {
-            if (!cameraEnabled) {
-                alert('Camera is not available');
-                return;
-            }
-            
-            cameraModal.classList.add('active');
-            await refreshCameraPreview();
-        }
-
-        async function refreshCameraPreview() {
-            try {
-                emotionText.textContent = 'Detecting emotion...';
-                const response = await fetch('/api/camera/snapshot');
-                const data = await response.json();
-                
-                if (data.error) {
-                    emotionText.textContent = `Error: ${data.error}`;
-                    return;
-                }
-                
-                cameraPreview.src = data.image;
-                
-                if (data.emotion) {
-                    const emotionEmojis = {
-                        'happy': '😊',
-                        'sad': '😢',
-                        'angry': '😠',
-                        'fear': '😨',
-                        'surprise': '😲',
-                        'neutral': '😐',
-                        'disgust': '🤢'
-                    };
-                    const emoji = emotionEmojis[data.emotion] || '🤔';
-                    emotionText.textContent = `Detected: ${data.emotion} ${emoji}`;
-                } else {
-                    emotionText.textContent = 'No face detected - try better lighting or move closer';
-                }
-            } catch (error) {
-                console.error('Camera preview failed:', error);
-                emotionText.textContent = 'Failed to capture image';
-            }
-        }
-
-        function closeCameraPreview() {
-            cameraModal.classList.remove('active');
-        }
-
-        sendButton.addEventListener('click', () => sendMessage(false));
-        cameraButton.addEventListener('click', () => sendMessage(true));
-        resetButton.addEventListener('click', resetConversation);
-        previewButton.addEventListener('click', showCameraPreview);
-        closeModal.addEventListener('click', closeCameraPreview);
-        refreshPreview.addEventListener('click', refreshCameraPreview);
-        
+        // Events
+        sendButton.addEventListener('click', sendMessage);
         messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage(false);
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        resetButton.addEventListener('click', async () => {
+            if (confirm('Are you sure you want to reset the conversation?')) {
+                await fetch('/api/reset', { method: 'POST' });
+                chatContainer.innerHTML = '';
+                createMessageElement('assistant', 'Let\'s start fresh. I am here for you.');
             }
         });
 
-        // Close modal on background click
-        cameraModal.addEventListener('click', (e) => {
-            if (e.target === cameraModal) {
-                closeCameraPreview();
-            }
-        });
-
+        // Init
         checkStatus();
-        setInterval(checkStatus, 30000);
+        setInterval(checkStatus, 30000); // Check LLM/camera status every 30s
     </script>
 </body>
 </html>

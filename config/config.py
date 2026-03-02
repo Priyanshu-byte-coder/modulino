@@ -17,7 +17,7 @@ OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 LLM_MODEL = os.getenv("LLM_MODEL", "phi3:mini")
 LLM_TEMPERATURE = 0.3  # Lower for more focused, faster responses
 LLM_MAX_TOKENS = 60  # Brief responses optimized for CPU
-LLM_NUM_CTX = 1536  # Balanced context window for phi3
+LLM_NUM_CTX = 1024  # Optimized context window for CPU inference
 LLM_NUM_THREAD = 4  # CPU threads for Raspberry Pi
 LLM_TIMEOUT = 300  # 5 min timeout for slow CPU inference
 LLM_STOP_SEQUENCES = ["\n\n", "User:", "Assistant:"]  # Stop at natural breaks
@@ -30,7 +30,7 @@ SENTIMENT_THRESHOLDS = {
 
 # --- Memory / RAG Configuration ---
 MEMORY_COLLECTION = "conversations"
-MEMORY_TOP_K = 3  # Reduced for faster retrieval on CPU
+MEMORY_TOP_K = 2  # Reduced for faster retrieval on CPU
 
 # --- Camera Configuration ---
 # CAMERA_ENABLED = os.getenv("CAMERA_ENABLED", "false").lower() == "true"

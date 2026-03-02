@@ -34,7 +34,7 @@ class AgentBrain:
             "memory": True,
         }
 
-    def process(self, user_input: str, face_emotion: str | None = None) -> str:
+    def process(self, user_input: str, face_emotion: str | None = None, stream: bool = False):
         """
         Full processing pipeline for a user message.
 
@@ -64,23 +64,49 @@ class AgentBrain:
         self._conversation_history.append({"role": "user", "content": user_input})
 
         messages = [{"role": "system", "content": system_prompt}] + self._conversation_history[-4:]
-        response = self.llm.chat(messages)
+        
+        if stream:
+            response_generator = self.llm.chat(messages, stream_output=True)
+            
+            def wrapped_generator():
+                full_response = []
+                for token in response_generator:
+                    full_response.append(token)
+                    yield token
+                    
+                final_response = "".join(full_response).strip()
+                self._conversation_history.append({"role": "assistant", "content": final_response})
+                
+                # 5. Store in long-term memory
+                self.memory.store(
+                    MemoryEntry(
+                        user_message=user_input,
+                        assistant_response=final_response,
+                        sentiment_label=sentiment_result.label,
+                        sentiment_score=sentiment_result.compound,
+                        emotion=mental_state.dominant_emotion,
+                        timestamp=time.time(),
+                    )
+                )
+            return wrapped_generator()
+        else:
+            response = self.llm.chat(messages)
 
-        self._conversation_history.append({"role": "assistant", "content": response})
+            self._conversation_history.append({"role": "assistant", "content": response})
 
-        # 5. Store in long-term memory
-        self.memory.store(
-            MemoryEntry(
-                user_message=user_input,
-                assistant_response=response,
-                sentiment_label=sentiment_result.label,
-                sentiment_score=sentiment_result.compound,
-                emotion=mental_state.dominant_emotion,
-                timestamp=time.time(),
+            # 5. Store in long-term memory
+            self.memory.store(
+                MemoryEntry(
+                    user_message=user_input,
+                    assistant_response=response,
+                    sentiment_label=sentiment_result.label,
+                    sentiment_score=sentiment_result.compound,
+                    emotion=mental_state.dominant_emotion,
+                    timestamp=time.time(),
+                )
             )
-        )
 
-        return response
+            return response
 
     def _build_system_prompt(self, mental_state, memory_context: str) -> str:
         """Construct a compact system prompt for CPU inference."""
