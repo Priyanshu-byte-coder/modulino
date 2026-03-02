@@ -25,6 +25,12 @@ class BaseCamera(ABC):
     @abstractmethod
     def release(self) -> None: ...
 
+    @abstractmethod
+    def capture_frame(self) -> Optional["numpy.ndarray"]: ...
+
+    @abstractmethod
+    def capture_snapshot_with_overlay(self) -> tuple[Optional[bytes], Optional[str]]: ...
+
 
 class WebcamCamera(BaseCamera):
     """Laptop webcam implementation with FER emotion detection."""
@@ -51,7 +57,7 @@ class WebcamCamera(BaseCamera):
 
             # Camera initialized successfully
             self._initialized = True
-            logger.info(f"Webcam initialized on /dev/video{CAMERA_INDEX}.")
+            logger.info(f"Webcam initialized on camera index {CAMERA_INDEX}.")
             
             # Try to initialize FER (optional)
             try:
@@ -128,6 +134,56 @@ class WebcamCamera(BaseCamera):
         except ImportError:
             logger.warning("opencv-python not installed; camera unavailable.")
             return False
+
+    def capture_frame(self):
+        """Capture a single raw frame from the camera. Returns frame or None."""
+        if not self._initialized or self._cap is None:
+            return None
+        try:
+            import cv2
+            ret, frame = self._cap.read()
+            if not ret or frame is None:
+                return None
+            return frame
+        except Exception as e:
+            logger.error("Frame capture error: %s", e)
+            return None
+
+    def capture_snapshot_with_overlay(self) -> tuple[Optional[bytes], Optional[str]]:
+        """Capture frame, run emotion detection, draw overlay, return (jpeg_bytes, emotion)."""
+        if not self._initialized or self._cap is None:
+            return None, None
+        try:
+            import cv2
+            ret, frame = self._cap.read()
+            if not ret or frame is None:
+                return None, None
+
+            emotion = None
+            if self._detector is not None:
+                try:
+                    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    result = self._detector.detect_emotions(rgb_frame)
+                    if result and len(result) > 0:
+                        emotions = result[0]["emotions"]
+                        emotion = max(emotions, key=emotions.get)
+                        confidence = emotions[emotion]
+                        box = result[0]["box"]
+                        x, y, w, h = box
+                        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                        text = f"{emotion}: {confidence:.2f}"
+                        font = cv2.FONT_HERSHEY_SIMPLEX
+                        text_size = cv2.getTextSize(text, font, 0.6, 2)[0]
+                        cv2.rectangle(frame, (x, y - 30), (x + text_size[0] + 10, y), (0, 255, 0), -1)
+                        cv2.putText(frame, text, (x + 5, y - 10), font, 0.6, (0, 0, 0), 2)
+                except Exception as e:
+                    logger.warning("Emotion detection failed during snapshot: %s", e)
+
+            _, buffer = cv2.imencode('.jpg', frame)
+            return buffer.tobytes(), emotion
+        except Exception as e:
+            logger.error("Snapshot capture error: %s", e)
+            return None, None
 
     def release(self) -> None:
         if self._cap is not None:

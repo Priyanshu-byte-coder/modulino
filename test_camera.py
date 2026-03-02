@@ -27,7 +27,9 @@ try:
     else:
         print("✗ Failed to open webcam")
         print("  - Check if another app is using the camera")
-        print("  - Check Windows camera permissions")
+        print("  - On RPi: check 'sudo raspi-config' → Interface Options → Camera")
+        print("  - On RPi: ensure camera cable is connected properly")
+        print("  - On Windows: check camera permissions in Settings")
         sys.exit(1)
 except ImportError:
     print("✗ OpenCV not installed")

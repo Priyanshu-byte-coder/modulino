@@ -9,8 +9,6 @@ import base64
 import json
 from flask import Flask, render_template, request, jsonify, Response
 from flask_cors import CORS
-import cv2
-
 from agent.brain import AgentBrain
 from interface.camera import create_camera
 from config.config import CAMERA_ENABLED, OLLAMA_BASE_URL, LLM_MODEL
@@ -154,44 +152,15 @@ def camera_snapshot():
     if not CAMERA_ENABLED or camera is None:
         return jsonify({"error": "Camera not enabled"}), 400
     
-    if not camera._initialized or camera._cap is None:
+    if not camera.is_available():
         return jsonify({"error": "Camera not initialized. Check webcam connection and permissions."}), 400
     
     try:
-        # Capture frame
-        ret, frame = camera._cap.read()
-        if not ret or frame is None:
+        jpeg_bytes, emotion = camera.capture_snapshot_with_overlay()
+        if jpeg_bytes is None:
             return jsonify({"error": "Failed to capture frame from webcam"}), 500
         
-        # Detect emotion
-        emotion = None
-        try:
-            if camera._detector is not None:
-                rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                result = camera._detector.detect_emotions(rgb_frame)
-                
-                if result and len(result) > 0:
-                    emotions = result[0]["emotions"]
-                    emotion = max(emotions, key=emotions.get)
-                    confidence = emotions[emotion]
-                    
-                    # Draw bounding box and emotion label on frame
-                    box = result[0]["box"]
-                    x, y, w, h = box
-                    cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
-                    
-                    # Add emotion text with background
-                    text = f"{emotion}: {confidence:.2f}"
-                    font = cv2.FONT_HERSHEY_SIMPLEX
-                    text_size = cv2.getTextSize(text, font, 0.6, 2)[0]
-                    cv2.rectangle(frame, (x, y-30), (x+text_size[0]+10, y), (0, 255, 0), -1)
-                    cv2.putText(frame, text, (x+5, y-10), font, 0.6, (0, 0, 0), 2)
-        except Exception as e:
-            logger.warning(f"Emotion detection failed: {e}")
-        
-        # Encode frame to JPEG
-        _, buffer = cv2.imencode('.jpg', frame)
-        jpg_as_text = base64.b64encode(buffer).decode('utf-8')
+        jpg_as_text = base64.b64encode(jpeg_bytes).decode('utf-8')
         
         return jsonify({
             "image": f"data:image/jpeg;base64,{jpg_as_text}",
