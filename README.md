@@ -44,6 +44,7 @@ The companion is named **Maya** and provides brief, warm, supportive responses t
 - **Fully Offline** — No internet required after initial setup. All inference happens locally on-device.
 - **Privacy-First** — Zero data leaves the Raspberry Pi. No cloud APIs, no telemetry.
 - **Multimodal Emotion Understanding** — Combines text sentiment + facial expression + conversation history.
+- **Guided Mental Exercises** — When stress is detected, Maya offers quick 30-second exercises (breathing, grounding, gratitude, mindfulness) with opt-in/skip functionality.
 - **Long-Term Memory (RAG)** — Remembers past conversations using ChromaDB vector similarity search and uses them to provide context-aware responses.
 - **Dual Interface** — Terminal CLI for direct interaction, or a beautiful Flask web UI accessible from any device on the local network.
 - **Real-Time Camera Feed** — Web interface shows live camera feed with emotion overlay and bounding boxes.
@@ -108,7 +109,8 @@ wellbeing_ai/
 │   ├── llm.py               # LLMClient — Ollama REST API integration
 │   ├── sentiment.py         # SentimentAnalyzer — VADER-based text sentiment
 │   ├── emotion.py           # EmotionEngine — multimodal emotion fusion
-│   └── memory.py            # ConversationMemory — ChromaDB RAG store
+│   ├── memory.py            # ConversationMemory — ChromaDB RAG store
+│   └── exercises.py         # ExerciseManager — guided mental exercises
 │
 ├── config/                  # Configuration
 │   ├── __init__.py
@@ -236,6 +238,52 @@ wellbeing_ai/
 ---
 
 ## Complete Workflow
+
+### Guided Mental Exercises
+
+Maya actively monitors the user's emotional state and offers guided mental exercises when stress is detected. This feature is designed to be:
+
+- **Non-intrusive** — Exercises are only offered when multiple stress indicators align (persistent negative mood, declining trend, stress emotions like sad/angry/fear)
+- **Opt-in** — User can accept ("yes", "let's do it") or decline ("skip", "not now")
+- **Quick** — All exercises complete in under 30 seconds, optimized for RPi performance
+- **Skippable** — User can exit mid-exercise by saying "skip" or "stop"
+
+#### Exercise Library
+
+Maya includes 7 evidence-based exercises across 4 categories:
+
+**Breathing Exercises:**
+- **Box Breathing** — 4-4-4-4 pattern (inhale, hold, exhale, hold)
+- **Calming Breath** — 4-6 pattern (inhale 4s, exhale 6s)
+
+**Grounding Exercises:**
+- **5-4-3-2-1 Technique** — Name 5 things you see, 4 you feel, 3 you hear, 2 you smell, 1 you taste
+
+**Gratitude Exercises:**
+- **Quick Gratitude** — Reflect on one thing you're grateful for
+
+**Mindfulness Exercises:**
+- **Body Scan** — Release tension in shoulders, jaw, chest, toes
+- **Present Moment** — Three deep breaths with awareness
+- **Tension Release** — Progressive muscle relaxation (squeeze and release)
+
+#### Exercise Trigger Conditions
+
+Exercises are offered when **any** of these conditions are met:
+- Historical sentiment average < -0.3 (persistent low mood)
+- Emotional trend is "declining" AND average < -0.15 (getting worse)
+- Current message sentiment < -0.5 (very negative right now)
+- Emotion is sad/angry/fear/disgust AND sentiment < -0.2 (stressed + negative)
+
+#### Cooldown Period
+
+To avoid overwhelming the user, exercises are only offered once every 5 conversation turns (configurable via `EXERCISE_COOLDOWN_TURNS`).
+
+#### Web UI Enhancement
+
+Exercise messages are visually distinct in the web interface with a gradient background and left border, making them easy to identify.
+
+---
 
 ### Per-Message Processing Pipeline
 
@@ -481,6 +529,8 @@ All configuration lives in `config/config.py`. Key settings:
 | `CAMERA_SAMPLE_INTERVAL` | `3` | Capture emotion every N turns (CLI) |
 | `MEMORY_COLLECTION` | `conversations` | ChromaDB collection name |
 | `MEMORY_TOP_K` | `2` | Number of memories to retrieve per query |
+| `EXERCISE_TRIGGER_THRESHOLD` | `-0.3` | Sentiment threshold for offering exercises |
+| `EXERCISE_COOLDOWN_TURNS` | `5` | Minimum turns between exercise offers |
 | `DISPLAY_MODE` | `terminal` | Display mode (`terminal` or `eink`) |
 | `SYSTEM_PROMPT` | Maya persona | System prompt sent to the LLM |
 
@@ -536,7 +586,19 @@ ChromaDB-backed long-term memory with RAG:
 - `retrieve(query, top_k)` → semantic similarity search, returns `list[RetrievedMemory]`
 - Uses cosine distance in HNSW index
 - Each entry stores: user message, assistant response, sentiment label/score, emotion, timestamp
-- Documents are formatted as `"User: ...\nAssistant: ..."` for embedding
+- Documents are formatted as `"The user said: ...\nMaya (the AI assistant) responded: ..."` for embedding (prevents role confusion)
+
+### `agent/exercises.py` — ExerciseManager
+
+Manages guided mental exercises for stress relief:
+- `ExerciseManager` — tracks exercise state and cooldown periods
+- `should_offer_exercise(current_turn, cooldown_turns)` → checks if enough time has passed since last offer
+- `get_random_exercise()` → selects a random exercise, avoiding repetition
+- `mark_exercise_offered(turn)` → records when an exercise was offered
+- `format_exercise_offer()` → generates the opt-in offer message
+- `format_exercise_steps(exercise)` → formats exercise steps into a single message
+- Contains 7 pre-built exercises: Box Breathing, Calming Breath, 5-4-3-2-1 Grounding, Quick Gratitude, Body Scan, Present Moment, Tension Release
+- All exercises complete in under 30 seconds
 
 ### `interface/camera.py` — BaseCamera / WebcamCamera
 

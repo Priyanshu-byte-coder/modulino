@@ -25,6 +25,7 @@ class MentalState:
     emotional_trend: str = "stable"  # "improving", "declining", "stable"
     dominant_emotion: str = "neutral"
     session_turn_count: int = 0
+    needs_exercise: bool = False  # True if user would benefit from a mental exercise
 
     def to_context_string(self) -> str:
         """Format mental state for injection into the LLM prompt."""
@@ -54,6 +55,7 @@ class EmotionEngine:
         sentiment: SentimentResult,
         face_emotion: Optional[str] = None,
         retrieved_memories: Optional[list[RetrievedMemory]] = None,
+        exercise_threshold: float = -0.3,
     ) -> MentalState:
         """Process new input signals and return updated mental state."""
         self._turn_count += 1
@@ -74,6 +76,11 @@ class EmotionEngine:
             if neg_ratio > 0.6:
                 hist_avg -= 0.1  # Weight toward concern
 
+        # Detect if user needs a mental exercise
+        needs_exercise = self._should_offer_exercise(
+            hist_avg, trend, effective_emotion, sentiment.compound
+        )
+
         return MentalState(
             sentiment=sentiment,
             face_emotion=face_emotion,
@@ -81,6 +88,7 @@ class EmotionEngine:
             emotional_trend=trend,
             dominant_emotion=effective_emotion,
             session_turn_count=self._turn_count,
+            needs_exercise=needs_exercise,
         )
 
     def _resolve_emotion(
@@ -114,3 +122,26 @@ class EmotionEngine:
         elif diff < -0.15:
             return "declining"
         return "stable"
+
+    def _should_offer_exercise(
+        self, hist_avg: float, trend: str, emotion: str, current_sentiment: float
+    ) -> bool:
+        """Determine if user would benefit from a mental exercise."""
+        # Offer exercise if:
+        # 1. Historical average is negative (persistent low mood)
+        # 2. Trend is declining (getting worse)
+        # 3. Current sentiment is very negative
+        # 4. Emotion indicates stress (sad, angry, fear)
+        
+        stress_emotions = {"sad", "angry", "fear", "disgust"}
+        
+        if hist_avg < -0.3:  # Persistent negative mood
+            return True
+        if trend == "declining" and hist_avg < -0.15:  # Getting worse
+            return True
+        if current_sentiment < -0.5:  # Very negative right now
+            return True
+        if emotion in stress_emotions and current_sentiment < -0.2:  # Stressed + negative
+            return True
+        
+        return False

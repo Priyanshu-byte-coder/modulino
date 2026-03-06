@@ -43,7 +43,11 @@ DISPLAY_MODE = os.getenv("DISPLAY_MODE", "terminal")  # "terminal" or "eink"
 TERMINAL_WIDTH = 80
 
 # --- System Prompt (kept short for CPU performance) ---
-SYSTEM_PROMPT = """You are Maya, a caring friend. Give brief, warm replies (1-2 sentences max). Be supportive and genuine."""
+SYSTEM_PROMPT = """Your name is Maya. You are an AI wellbeing companion. The human talking to you is the USER — never call them Maya or any made-up name. If you don't know their name, just say "friend" or ask. Never invent a name for the user. You are ALWAYS Maya, the assistant. Keep replies brief (1-2 sentences), warm, and supportive."""
+
+# --- Mental Exercise Configuration ---
+EXERCISE_TRIGGER_THRESHOLD = -0.3  # Trigger exercises when sentiment avg drops below this
+EXERCISE_COOLDOWN_TURNS = 5  # Don't offer exercises more than once per N turns
 
 # --- Ensure data directories exist ---
 MEMORY_DIR.mkdir(parents=True, exist_ok=True)

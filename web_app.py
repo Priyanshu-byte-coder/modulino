@@ -133,6 +133,18 @@ def chat_stream():
                 yield f"data: {json.dumps({'type': 'emotion', 'emotion': face_emotion})}\n\n"
             
             response_generator = brain.process(user_message, face_emotion=face_emotion, stream=True)
+            
+            # Check if brain triggered an exercise offer during processing
+            if brain._exercise_state.get("pending"):
+                exercises = brain.exercise_manager.get_all_exercises()
+                yield f"data: {json.dumps({'type': 'exercise_offer', 'exercises': exercises})}\n\n"
+                # Consume the text generator so it doesn't leak
+                for _ in response_generator:
+                    pass
+                brain._exercise_state["pending"] = False
+                yield f"data: {json.dumps({'type': 'done'})}\n\n"
+                return
+            
             for token in response_generator:
                 yield f"data: {json.dumps({'type': 'token', 'token': token})}\n\n"
                 
@@ -201,6 +213,81 @@ def reset_conversation():
         logger.info("Conversation reset")
     
     return jsonify({"success": True})
+
+
+@app.route('/api/trigger_exercise', methods=['POST'])
+def trigger_exercise():
+    """Manually trigger an exercise offer (for demos/evaluation)."""
+    global brain
+    
+    if brain is None:
+        initialize_agent()
+    
+    try:
+        brain._exercise_state["pending"] = True
+        exercises = brain.exercise_manager.get_all_exercises()
+        logger.info("Manual exercise trigger activated")
+        
+        return jsonify({
+            "success": True,
+            "exercises": exercises
+        })
+    except Exception as e:
+        logger.error(f"Error triggering exercise: {e}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/exercises', methods=['GET'])
+def list_exercises():
+    """Return the full list of available exercises with step metadata."""
+    global brain
+    
+    if brain is None:
+        initialize_agent()
+    
+    return jsonify({"exercises": brain.exercise_manager.get_all_exercises()})
+
+
+@app.route('/api/exercise/skip', methods=['POST'])
+def skip_exercise():
+    """Clear exercise state when user skips via frontend."""
+    global brain
+    
+    if brain is None:
+        initialize_agent()
+    
+    brain._exercise_state["pending"] = False
+    brain._exercise_state["active"] = False
+    brain._exercise_state["current_exercise"] = None
+    logger.info("Exercise skipped via frontend")
+    
+    return jsonify({"success": True})
+
+
+@app.route('/api/exercise/start', methods=['POST'])
+def start_exercise():
+    """Start a specific exercise by name. Returns exercise steps with timer data."""
+    global brain
+    
+    if brain is None:
+        initialize_agent()
+    
+    data = request.json
+    exercise_name = data.get("name", "")
+    
+    exercise = brain.exercise_manager.get_exercise_by_name(exercise_name)
+    if exercise is None:
+        return jsonify({"error": f"Exercise '{exercise_name}' not found"}), 404
+    
+    brain._exercise_state["pending"] = False
+    brain._exercise_state["active"] = True
+    brain._exercise_state["current_exercise"] = exercise
+    logger.info(f"Starting exercise: {exercise.name}")
+    
+    return jsonify({
+        "success": True,
+        "exercise": exercise.to_dict()
+    })
 
 
 if __name__ == '__main__':

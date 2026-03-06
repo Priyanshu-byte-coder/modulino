@@ -61,7 +61,7 @@ class ConversationMemory:
     def store(self, entry: MemoryEntry) -> None:
         """Store a conversation turn in memory."""
         doc_id = f"msg_{int(entry.timestamp * 1000)}"
-        document = f"User: {entry.user_message}\nAssistant: {entry.assistant_response}"
+        document = f"The user said: {entry.user_message}\nMaya (the AI assistant) responded: {entry.assistant_response}"
         metadata = {
             "user_message": entry.user_message[:500],
             "assistant_response": entry.assistant_response[:500],

@@ -180,6 +180,180 @@
             color: var(--text-main);
             border-top-left-radius: 4px;
         }
+        
+        .message.assistant.exercise .message-content {
+            background: linear-gradient(135deg, #e0f7fa 0%, #e1bee7 100%);
+            border-left: 4px solid #7b9acc;
+            font-weight: 500;
+        }
+
+        /* ---- Mood Chips (pre-questions) ---- */
+        .mood-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 14px;
+        }
+        .mood-chip {
+            padding: 10px 18px;
+            border-radius: 30px;
+            background: rgba(255,255,255,0.75);
+            border: 2px solid var(--primary-light);
+            color: var(--primary-color);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-family: 'Quicksand', sans-serif;
+        }
+        .mood-chip:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(123,154,204,0.3);
+        }
+
+        /* ---- Exercise Selection Cards ---- */
+        .exercise-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .exercise-card {
+            padding: 12px 16px;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.85);
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 180px;
+            flex: 1 1 180px;
+            max-width: 260px;
+        }
+        .exercise-card:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(123,154,204,0.2);
+        }
+        .exercise-card-icon {
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+        .exercise-card-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .exercise-card-name {
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--text-main);
+        }
+        .exercise-card-desc {
+            font-size: 12px;
+            color: var(--text-light);
+            line-height: 1.3;
+        }
+        .exercise-card-skip {
+            padding: 10px 18px;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.5);
+            border: 1px solid rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 180px;
+            flex: 1 1 180px;
+            max-width: 260px;
+        }
+        .exercise-card-skip:hover {
+            background: white;
+            color: #e53e3e;
+        }
+
+        /* ---- Exercise Player ---- */
+        .exercise-player {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            padding: 8px 0;
+            width: 100%;
+        }
+        .exercise-step-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-main);
+            text-align: center;
+            min-height: 24px;
+        }
+        .timer-ring-container {
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
+        .timer-ring-container svg {
+            transform: rotate(-90deg);
+        }
+        .timer-ring-bg {
+            fill: none;
+            stroke: #e2e8f0;
+            stroke-width: 6;
+        }
+        .timer-ring-progress {
+            fill: none;
+            stroke: var(--primary-color);
+            stroke-width: 6;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.1s linear;
+        }
+        .timer-ring-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        .exercise-progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .exercise-progress-fill {
+            height: 100%;
+            background: var(--primary-color);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+        .exercise-skip-btn {
+            padding: 8px 20px;
+            border-radius: 20px;
+            background: transparent;
+            border: 1px solid rgba(0,0,0,0.1);
+            color: var(--text-light);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'Quicksand', sans-serif;
+        }
+        .exercise-skip-btn:hover {
+            background: rgba(229,62,62,0.08);
+            color: #e53e3e;
+            border-color: #e53e3e;
+        }
 
         .typing-indicator {
             display: inline-flex;
@@ -368,8 +542,22 @@
             gap: 6px;
         }
         
+        .btn-exercise {
+            margin: 20px 20px 10px 20px;
+            padding: 12px;
+            background: linear-gradient(135deg, #e0f7fa 0%, #e1bee7 100%);
+            color: var(--primary-color);
+            border: 2px solid var(--primary-light);
+            font-weight: 600;
+        }
+        .btn-exercise:hover {
+            background: linear-gradient(135deg, #b2ebf2 0%, #ce93d8 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(123, 154, 204, 0.3);
+        }
+        
         .btn-reset {
-            margin: 20px;
+            margin: 10px 20px 20px 20px;
             padding: 12px;
             background: rgba(255,255,255,0.7);
             color: var(--text-light);
@@ -438,6 +626,12 @@
                     <div class="avatar">💙</div>
                     <div class="message-content">
                         Hello. I'm Maya, your supportive AI companion. Take a deep breath. How are you feeling today?
+                        <div class="mood-chips" id="moodChips">
+                            <button class="mood-chip" data-msg="I'm feeling happy today! 😊">😊 I'm happy today</button>
+                            <button class="mood-chip" data-msg="I'm feeling a bit stressed lately 😔">😔 Feeling stressed</button>
+                            <button class="mood-chip" data-msg="I'm doing okay, just checking in">😌 I'm doing okay</button>
+                            <button class="mood-chip" data-msg="I'm feeling anxious and could use some support 😰">😰 Feeling anxious</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -475,76 +669,78 @@
                 </div>
             </div>
             
+            <button class="btn btn-exercise" id="exerciseButton">🧘 Try Exercise</button>
             <button class="btn btn-reset" id="resetButton">Reset Conversation</button>
         </aside>
     </div>
 
     <script>
+        // ================================================================
         // DOM Elements
+        // ================================================================
         const chatContainer = document.getElementById('chatContainer');
-        const messageInput = document.getElementById('messageInput');
-        const sendButton = document.getElementById('sendButton');
-        const resetButton = document.getElementById('resetButton');
-        
-        const cameraPreview = document.getElementById('cameraPreview');
-        const cameraPlaceholder = document.getElementById('cameraPlaceholder');
-        const emotionEmoji = document.getElementById('emotionEmoji');
-        const emotionText = document.getElementById('emotionText');
-        const emotionSubtext = document.getElementById('emotionSubtext');
+        const messageInput  = document.getElementById('messageInput');
+        const sendButton    = document.getElementById('sendButton');
+        const resetButton   = document.getElementById('resetButton');
+        const exerciseButton= document.getElementById('exerciseButton');
+
+        const cameraPreview    = document.getElementById('cameraPreview');
+        const cameraPlaceholder= document.getElementById('cameraPlaceholder');
+        const emotionEmoji     = document.getElementById('emotionEmoji');
+        const emotionText      = document.getElementById('emotionText');
+        const emotionSubtext   = document.getElementById('emotionSubtext');
 
         let cameraEnabled = false;
         let lastDetectedEmotion = null;
         let emotionPollInterval = null;
+        let exerciseRunning = false;   // true while an exercise auto-plays
+        let exerciseCancelled = false; // set true when user clicks skip mid-exercise
 
         const EMOTION_MAP = {
-            'happy': { emoji: '😊', color: '#f6e05e', label: 'Happy' },
-            'sad': { emoji: '😢', color: '#90cdf4', label: 'Sad' },
-            'angry': { emoji: '😠', color: '#fc8181', label: 'Angry' },
-            'fear': { emoji: '😨', color: '#d6bcfa', label: 'Afraid' },
+            'happy':    { emoji: '😊', color: '#f6e05e', label: 'Happy' },
+            'sad':      { emoji: '😢', color: '#90cdf4', label: 'Sad' },
+            'angry':    { emoji: '😠', color: '#fc8181', label: 'Angry' },
+            'fear':     { emoji: '😨', color: '#d6bcfa', label: 'Afraid' },
             'surprise': { emoji: '😲', color: '#fbd38d', label: 'Surprised' },
-            'neutral': { emoji: '😌', color: '#e2e8f0', label: 'Calm / Neutral' },
-            'disgust': { emoji: '🤢', color: '#9ae6b4', label: 'Disgusted' }
+            'neutral':  { emoji: '😌', color: '#e2e8f0', label: 'Calm / Neutral' },
+            'disgust':  { emoji: '🤢', color: '#9ae6b4', label: 'Disgusted' }
         };
 
-        // System Status Check
+        // ================================================================
+        // System Status
+        // ================================================================
         async function checkStatus() {
             try {
                 const response = await fetch('/api/status');
                 const data = await response.json();
-                
                 document.getElementById('llmStatus').classList.toggle('active', data.status.llm);
                 document.getElementById('memoryStatus').classList.toggle('active', data.status.memory);
                 document.getElementById('cameraStatus').classList.toggle('active', data.status.camera);
-                
                 cameraEnabled = data.camera_enabled && data.status.camera;
-                
-                if (cameraEnabled && !emotionPollInterval) {
-                    startEmotionPolling();
-                } else if (!cameraEnabled && emotionPollInterval) {
+                if (cameraEnabled && !emotionPollInterval) startEmotionPolling();
+                else if (!cameraEnabled && emotionPollInterval) {
                     stopEmotionPolling();
                     cameraPlaceholder.style.display = 'block';
                     cameraPreview.style.display = 'none';
                     cameraPlaceholder.textContent = 'Camera disabled or unavailable';
                 }
-            } catch (error) {
-                console.error('Status check failed:', error);
-            }
+            } catch (error) { console.error('Status check failed:', error); }
         }
 
+        // ================================================================
         // Emotion Polling
+        // ================================================================
         async function pollEmotion() {
             if (!cameraEnabled) return;
             try {
                 const response = await fetch('/api/camera/snapshot');
                 if (!response.ok) return;
                 const data = await response.json();
-                
                 if (data.image) {
                     cameraPreview.src = data.image;
                     cameraPreview.style.display = 'block';
                     cameraPlaceholder.style.display = 'none';
                 }
-                
                 if (data.emotion && EMOTION_MAP[data.emotion]) {
                     lastDetectedEmotion = data.emotion;
                     const emoInfo = EMOTION_MAP[data.emotion];
@@ -555,41 +751,42 @@
                     emotionEmoji.textContent = '✨';
                     emotionText.textContent = 'Looking for face...';
                 }
-            } catch (err) {
-                console.warn('Emotion polling error', err);
-            }
+            } catch (err) { console.warn('Emotion polling error', err); }
         }
+        function startEmotionPolling() { pollEmotion(); emotionPollInterval = setInterval(pollEmotion, 2500); }
+        function stopEmotionPolling()  { if (emotionPollInterval) { clearInterval(emotionPollInterval); emotionPollInterval = null; } }
 
-        function startEmotionPolling() {
-            pollEmotion(); // Immediate first poll
-            emotionPollInterval = setInterval(pollEmotion, 2500); // Poll every 2.5s
-        }
-
-        function stopEmotionPolling() {
-            if (emotionPollInterval) {
-                clearInterval(emotionPollInterval);
-                emotionPollInterval = null;
-            }
-        }
-
+        // ================================================================
         // Chat UI Helpers
+        // ================================================================
         function createMessageElement(role, initialText = '') {
             const msgDiv = document.createElement('div');
             msgDiv.className = `message ${role}`;
-            
             const avatar = document.createElement('div');
             avatar.className = 'avatar';
             avatar.textContent = role === 'user' ? '👤' : '💙';
-            
             const content = document.createElement('div');
             content.className = 'message-content';
-            content.textContent = initialText;
-            
+            if (initialText) content.textContent = initialText;
             msgDiv.appendChild(avatar);
             msgDiv.appendChild(content);
             chatContainer.appendChild(msgDiv);
             chatContainer.scrollTop = chatContainer.scrollHeight;
-            
+            return content;
+        }
+
+        function createExerciseMessage() {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message assistant exercise';
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.textContent = '💙';
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            msgDiv.appendChild(avatar);
+            msgDiv.appendChild(content);
+            chatContainer.appendChild(msgDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
             return content;
         }
 
@@ -600,76 +797,239 @@
             return div;
         }
 
+        // ================================================================
+        // Exercise Selection Cards
+        // ================================================================
+        function showExerciseSelection(exercises) {
+            const content = createExerciseMessage();
+            content.textContent = 'Choose an exercise to try:';
+
+            const cardsDiv = document.createElement('div');
+            cardsDiv.className = 'exercise-cards';
+
+            exercises.forEach(ex => {
+                const card = document.createElement('div');
+                card.className = 'exercise-card';
+                card.innerHTML = `
+                    <div class="exercise-card-icon">${ex.icon}</div>
+                    <div class="exercise-card-info">
+                        <div class="exercise-card-name">${ex.name}</div>
+                        <div class="exercise-card-desc">${ex.description}</div>
+                    </div>`;
+                card.addEventListener('click', () => {
+                    // Disable all cards
+                    cardsDiv.querySelectorAll('.exercise-card, .exercise-card-skip').forEach(c => {
+                        c.style.pointerEvents = 'none';
+                        c.style.opacity = '0.5';
+                    });
+                    card.style.opacity = '1';
+                    card.style.borderColor = 'var(--primary-color)';
+                    startExercisePlayer(ex);
+                });
+                cardsDiv.appendChild(card);
+            });
+
+            // Skip option
+            const skipCard = document.createElement('div');
+            skipCard.className = 'exercise-card-skip';
+            skipCard.textContent = 'Skip for now';
+            skipCard.addEventListener('click', async () => {
+                cardsDiv.querySelectorAll('.exercise-card, .exercise-card-skip').forEach(c => {
+                    c.style.pointerEvents = 'none';
+                    c.style.opacity = '0.5';
+                });
+                // Clear pending state on backend so next message isn't intercepted
+                try { await fetch('/api/exercise/skip', { method: 'POST' }); } catch(e) {}
+                createMessageElement('assistant', "That's okay! I'm here whenever you need to talk.");
+            });
+            cardsDiv.appendChild(skipCard);
+
+            content.appendChild(cardsDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // ================================================================
+        // Exercise Player  (auto-progress + countdown timers)
+        // ================================================================
+        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+        async function startExercisePlayer(exercise) {
+            exerciseRunning = true;
+            exerciseCancelled = false;
+
+            // Notify backend
+            try {
+                await fetch('/api/exercise/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: exercise.name })
+                });
+            } catch (e) { console.warn('Could not notify backend:', e); }
+
+            const content = createExerciseMessage();
+            const player = document.createElement('div');
+            player.className = 'exercise-player';
+
+            // Progress bar
+            const progressBar = document.createElement('div');
+            progressBar.className = 'exercise-progress-bar';
+            const progressFill = document.createElement('div');
+            progressFill.className = 'exercise-progress-fill';
+            progressFill.style.width = '0%';
+            progressBar.appendChild(progressFill);
+
+            // Step text
+            const stepText = document.createElement('div');
+            stepText.className = 'exercise-step-text';
+
+            // Timer ring (hidden by default)
+            const timerContainer = document.createElement('div');
+            timerContainer.className = 'timer-ring-container';
+            timerContainer.style.display = 'none';
+            const circumference = 2 * Math.PI * 42;
+            timerContainer.innerHTML = `
+                <svg width="100" height="100">
+                    <circle class="timer-ring-bg" cx="50" cy="50" r="42"/>
+                    <circle class="timer-ring-progress" cx="50" cy="50" r="42"
+                        stroke-dasharray="${circumference}"
+                        stroke-dashoffset="0"/>
+                </svg>
+                <div class="timer-ring-text">0</div>`;
+
+            // Skip button
+            const skipBtn = document.createElement('button');
+            skipBtn.className = 'exercise-skip-btn';
+            skipBtn.textContent = 'Skip exercise';
+            skipBtn.addEventListener('click', () => { exerciseCancelled = true; });
+
+            player.appendChild(stepText);
+            player.appendChild(timerContainer);
+            player.appendChild(progressBar);
+            player.appendChild(skipBtn);
+            content.appendChild(player);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            const steps = exercise.steps;
+            const totalSteps = steps.length;
+
+            for (let i = 0; i < totalSteps; i++) {
+                if (exerciseCancelled) break;
+
+                const step = steps[i];
+                stepText.textContent = step.text;
+                progressFill.style.width = `${((i + 1) / totalSteps) * 100}%`;
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+
+                if (step.step_type === 'timer' && step.duration > 0) {
+                    // Show countdown ring
+                    timerContainer.style.display = 'block';
+                    await runTimerCountdown(timerContainer, step.duration, circumference);
+                    timerContainer.style.display = 'none';
+                } else {
+                    // Text step — auto-advance after duration or 3s default
+                    const wait = (step.duration > 0 ? step.duration : 3) * 1000;
+                    await sleep(wait);
+                }
+            }
+
+            // Cleanup
+            exerciseRunning = false;
+            player.remove();
+
+            if (exerciseCancelled) {
+                content.textContent = 'No problem! You can try again anytime.';
+                exerciseCancelled = false;
+            } else {
+                content.textContent = 'You did wonderfully! How are you feeling now?';
+            }
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        async function runTimerCountdown(container, totalSec, circumference) {
+            const progressCircle = container.querySelector('.timer-ring-progress');
+            const textEl = container.querySelector('.timer-ring-text');
+            const intervalMs = 100; // update every 100ms for smooth animation
+            let elapsed = 0;
+
+            return new Promise(resolve => {
+                textEl.textContent = totalSec;
+                const timer = setInterval(() => {
+                    if (exerciseCancelled) { clearInterval(timer); resolve(); return; }
+
+                    elapsed += intervalMs;
+                    const remaining = Math.max(0, totalSec - elapsed / 1000);
+                    const fraction = elapsed / (totalSec * 1000);
+
+                    textEl.textContent = Math.ceil(remaining);
+                    progressCircle.style.strokeDashoffset = (fraction * circumference).toString();
+
+                    if (elapsed >= totalSec * 1000) {
+                        clearInterval(timer);
+                        resolve();
+                    }
+                }, intervalMs);
+            });
+        }
+
+        // ================================================================
         // SSE Streaming Chat
-        async function sendMessage() {
-            const text = messageInput.value.trim();
+        // ================================================================
+        async function sendMessage(overrideText) {
+            const text = overrideText || messageInput.value.trim();
             if (!text) return;
-            
+
             messageInput.value = '';
             sendButton.disabled = true;
             messageInput.disabled = true;
-            
-            // Add user message
+
+            // Remove mood chips if they still exist
+            const chips = document.getElementById('moodChips');
+            if (chips) chips.remove();
+
             createMessageElement('user', text);
-            
-            // Add Assistant blank message with typing indicator
+
             const assistantContent = createMessageElement('assistant', '');
             assistantContent.appendChild(createTypingIndicator());
-            
+
             try {
                 const response = await fetch('/api/chat_stream', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        message: text,
-                        capture_emotion: true // We can still trigger backend log of emotion
-                    })
+                    body: JSON.stringify({ message: text, capture_emotion: true })
                 });
-
                 if (!response.ok) throw new Error('Network response was not ok');
 
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder('utf-8');
                 let assistantText = '';
-
-                // Remove typing indicator right before first chunk
                 let isFirstChunk = true;
 
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
-
                     const chunkStr = decoder.decode(value, { stream: true });
-                    const lines = chunkStr.split('\n');
-                    
-                    for (let line of lines) {
+                    for (let line of chunkStr.split('\n')) {
                         if (line.startsWith('data: ')) {
                             try {
                                 const data = JSON.parse(line.substring(6));
                                 if (data.type === 'token') {
-                                    if (isFirstChunk) {
-                                        assistantContent.innerHTML = ''; // clear typing indicator
-                                        isFirstChunk = false;
-                                    }
+                                    if (isFirstChunk) { assistantContent.innerHTML = ''; isFirstChunk = false; }
                                     assistantText += data.token;
                                     assistantContent.textContent = assistantText;
                                     chatContainer.scrollTop = chatContainer.scrollHeight;
+                                } else if (data.type === 'exercise_offer') {
+                                    // Remove the typing indicator and show exercise cards
+                                    assistantContent.parentElement.remove();
+                                    showExerciseSelection(data.exercises);
+                                    return;
                                 } else if (data.type === 'error') {
                                     assistantContent.textContent += `\n[Error: ${data.error}]`;
                                 }
-                            } catch (e) {
-                                console.warn('JSON parse error on chunk:', e, line);
-                            }
+                            } catch (e) { console.warn('JSON parse error on chunk:', e, line); }
                         }
                     }
                 }
-                
-                // If the stream yielded nothing for some reason, remove the dots
-                if (isFirstChunk) {
-                    assistantContent.innerHTML = '';
-                    assistantContent.textContent = 'Sorry, I got disconnected.';
-                }
-                
+                if (isFirstChunk) { assistantContent.innerHTML = ''; assistantContent.textContent = 'Sorry, I got disconnected.'; }
             } catch (error) {
                 console.error('Chat error:', error);
                 assistantContent.innerHTML = '';
@@ -681,23 +1041,55 @@
             }
         }
 
-        // Events
-        sendButton.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
+        // ================================================================
+        // Event Listeners
+        // ================================================================
+        sendButton.addEventListener('click', () => sendMessage());
+        messageInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+        exerciseButton.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/api/trigger_exercise', { method: 'POST' });
+                const data = await response.json();
+                if (data.success && data.exercises) {
+                    showExerciseSelection(data.exercises);
+                } else if (data.error) {
+                    console.error('Exercise trigger error:', data.error);
+                }
+            } catch (error) { console.error('Failed to trigger exercise:', error); }
         });
 
         resetButton.addEventListener('click', async () => {
             if (confirm('Are you sure you want to reset the conversation?')) {
                 await fetch('/api/reset', { method: 'POST' });
                 chatContainer.innerHTML = '';
-                createMessageElement('assistant', 'Let\'s start fresh. I am here for you.');
+                const content = createMessageElement('assistant', '');
+                content.innerHTML = `Let's start fresh. I am here for you.
+                    <div class="mood-chips" id="moodChips">
+                        <button class="mood-chip" data-msg="I'm feeling happy today! 😊">😊 I'm happy today</button>
+                        <button class="mood-chip" data-msg="I'm feeling a bit stressed lately 😔">😔 Feeling stressed</button>
+                        <button class="mood-chip" data-msg="I'm doing okay, just checking in">😌 I'm doing okay</button>
+                        <button class="mood-chip" data-msg="I'm feeling anxious and could use some support 😰">😰 Feeling anxious</button>
+                    </div>`;
             }
         });
 
+        // Re-attach mood-chip listener via delegation on chatContainer
+        chatContainer.addEventListener('click', (e) => {
+            const chip = e.target.closest('.mood-chip');
+            if (!chip) return;
+            const msg = chip.getAttribute('data-msg');
+            const chipsContainer = chip.closest('.mood-chips');
+            if (chipsContainer) chipsContainer.remove();
+            messageInput.value = msg;
+            sendMessage();
+        });
+
+        // ================================================================
         // Init
+        // ================================================================
         checkStatus();
-        setInterval(checkStatus, 30000); // Check LLM/camera status every 30s
+        setInterval(checkStatus, 30000);
     </script>
 </body>
 </html>
